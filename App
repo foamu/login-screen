@@ -1,0 +1,11 @@
+package passwordhashmap;
+
+public class App {
+
+	public static void main(String[] args) {
+
+		LoginScreen init = new LoginScreen();
+		init.createAndShowGUI();
+
+	}
+}

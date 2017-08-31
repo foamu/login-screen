@@ -1,0 +1,146 @@
+package passwordhashmap;
+
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JFormattedTextField;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
+
+public class LoginScreen extends JPanel implements ActionListener {
+
+	private static final long serialVersionUID = 7509522512286658559L;
+
+	PasswordHashing regLog = new PasswordHashing();
+
+	// For message dialogs
+	private JFrame controllingFrame; 
+
+	// Labels to identify the fields
+	private JLabel userLabel;
+	private JLabel passLabel;
+	private JLabel messageLabel1;
+	private JLabel messageLabel2;
+	private JLabel messageLabel3;
+
+	// Text for the labels
+	private static String usernameString = "Username: ";
+	private static String passwordString = "Password: ";
+	private static String messageString1 = "Usernames can only contain A-Z, 0-9 and _ values.";
+	private static String messageString2 = "Usernames must be 3-12 characters long.";
+	private static String messageString3 = "Passwords must be 8-24 characters long.";
+
+	// Fields for data entry
+	private JFormattedTextField userField;
+	private JPasswordField passField;
+
+	// Buttons
+	private JButton signUp;
+	private JButton login;
+
+	public LoginScreen() {
+		new BorderLayout();
+
+		// Create the labels
+		userLabel = new JLabel(usernameString);
+		passLabel = new JLabel(passwordString);
+		messageLabel1 = new JLabel(messageString1);
+		messageLabel2 = new JLabel(messageString2);
+		messageLabel3 = new JLabel(messageString3);
+
+		// Create the text fields
+		userField = new JFormattedTextField();
+		userField.setValue(new String());
+
+		passField = new JPasswordField(10);
+		passField.setActionCommand(new String());
+
+		// Create the buttons & add ActionListeners
+		signUp = new JButton("Register");
+		login = new JButton("Login");
+		signUp.addActionListener(this);
+		login.addActionListener(this);
+
+		// Tell accessibility tools about label/textfield pairs
+		userLabel.setLabelFor(userField);
+		passLabel.setLabelFor(passField);
+
+		// Layout the labels in a panel.
+		JPanel labelPane = new JPanel(new GridLayout(0, 1));
+		labelPane.add(userLabel);
+		labelPane.add(passLabel);
+		
+		// Panel for the message text
+		JPanel messagePane = new JPanel(new GridLayout(3, 1));
+		messagePane.add(messageLabel1);
+		messagePane.add(messageLabel2);
+		messagePane.add(messageLabel3);
+
+		// Layout the text fields in a panel.
+		JPanel fieldPane = new JPanel(new GridLayout(0, 1));
+		fieldPane.add(userField);
+		fieldPane.add(passField);
+
+		// Layout the buttons in a panel
+		JPanel buttonPane = new JPanel(new GridLayout(1, 1));
+		buttonPane.add(signUp);
+		buttonPane.add(login);
+
+		setBorder(BorderFactory.createEmptyBorder(45, 45, 45, 45));
+		add(labelPane, BorderLayout.CENTER);
+		add(fieldPane, BorderLayout.LINE_END);
+		add(buttonPane, BorderLayout.SOUTH);
+		add(messagePane, BorderLayout.NORTH);
+
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+
+		if (e.getSource() == signUp) {
+			String userValue = userField.getText();
+			char[] passValue = passField.getPassword();
+
+			if (regLog.getDB().containsKey(userValue)) {
+				JOptionPane.showMessageDialog(controllingFrame, "Invalid: User already registered.");
+			} else if (regLog.containsIllegalChars(userValue)) {
+				JOptionPane.showMessageDialog(controllingFrame,"Invalid characters in username. Only A-Z, 0-9 and _ are permitted.");
+			} else if (userValue.length() < 3 || userValue.length() > 12) {
+				JOptionPane.showMessageDialog(controllingFrame, "Usernames must be 3-12 characters in length.");
+			} else if (passValue.length < 8 || passValue.length > 24) {
+				JOptionPane.showMessageDialog(controllingFrame, "Passwords must be 8-24 characters in length.");
+			} else {
+				regLog.signup(userValue, passValue);
+			}
+		}
+
+		if (e.getSource() == login) {
+			String userValue = userField.getText();
+			char[] passValue = passField.getPassword();
+
+			if (regLog.login(userValue, passValue)) {
+				JOptionPane.showMessageDialog(controllingFrame, "Success! You typed the right password.");
+			} else {
+				JOptionPane.showMessageDialog(controllingFrame, "Failure! Password incorrect.");
+			}
+		}
+
+	}
+
+	public void createAndShowGUI() {
+		JFrame frame = new JFrame("FooCorp Login Screen");
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		frame.add(new LoginScreen());
+
+		frame.pack();
+		frame.setVisible(true);
+	}
+}
